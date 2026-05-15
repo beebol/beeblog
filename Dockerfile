@@ -41,10 +41,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # 复制 content 目录（文章存储）
 COPY --from=builder --chown=nextjs:nodejs /app/content ./content
 
-# 确保 .next 目录可写
-RUN chown -R nextjs:nodejs /app/.next && \
-    chmod -R 755 /app/.next
-
 USER nextjs
 
 EXPOSE 3000
