@@ -66,9 +66,9 @@ export default function AboutPage() {
                 🐙 GitHub: {about.github}
               </p>
             )}
-            {about.twitter && (
+            {about.wechat && (
               <p className="text-text-secondary">
-                🐦 Twitter: {about.twitter}
+                💬 微信: {about.wechat}
               </p>
             )}
           </div>

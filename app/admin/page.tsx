@@ -20,7 +20,7 @@ interface AboutData {
   emoji: string;
   email: string;
   github: string;
-  twitter: string;
+  wechat: string;
   content: string;
 }
 
@@ -47,7 +47,7 @@ export default function AdminPage() {
   const [aboutEmoji, setAboutEmoji] = useState('');
   const [aboutEmail, setAboutEmail] = useState('');
   const [aboutGithub, setAboutGithub] = useState('');
-  const [aboutTwitter, setAboutTwitter] = useState('');
+  const [aboutWechat, setAboutWechat] = useState('');
   const [aboutContent, setAboutContent] = useState('');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -92,7 +92,7 @@ export default function AdminPage() {
       setAboutEmoji(data.emoji || '');
       setAboutEmail(data.email || '');
       setAboutGithub(data.github || '');
-      setAboutTwitter(data.twitter || '');
+      setAboutWechat(data.wechat || '');
       setAboutContent(data.content || '');
     } catch (error) {
       console.error('Failed to fetch about:', error);
@@ -181,7 +181,7 @@ export default function AdminPage() {
         emoji: aboutEmoji,
         email: aboutEmail,
         github: aboutGithub,
-        twitter: aboutTwitter,
+        wechat: aboutWechat,
         content: aboutContent,
       };
 
@@ -643,12 +643,12 @@ export default function AdminPage() {
             />
           </div>
           <div>
-            <label className="block text-text-secondary text-sm mb-2">Twitter</label>
+            <label className="block text-text-secondary text-sm mb-2">微信号</label>
             <input
               type="text"
-              value={aboutTwitter}
-              onChange={(e) => setAboutTwitter(e.target.value)}
-              placeholder="@username"
+              value={aboutWechat}
+              onChange={(e) => setAboutWechat(e.target.value)}
+              placeholder="请输入微信号"
               className="w-full px-4 py-3 bg-background border border-slate-700 rounded-lg text-text-primary placeholder-text-secondary/50 focus:outline-none focus:border-primary transition-colors"
             />
           </div>

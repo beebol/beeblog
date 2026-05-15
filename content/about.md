@@ -5,7 +5,7 @@ subtitle: 全栈开发者 / 技术写作者
 emoji: "\U0001F41D"
 email: ww103421245@163.com
 github: github.com/beeblog
-twitter: '@beeblog'
+wechat: itopers
 ---
 
 ## 你好！欢迎来到我的个人博客。

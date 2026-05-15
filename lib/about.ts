@@ -11,7 +11,7 @@ export interface AboutData {
   emoji: string;
   email: string;
   github: string;
-  twitter: string;
+  wechat: string;
   content: string;
 }
 
@@ -24,7 +24,7 @@ export function getAboutData(): AboutData {
       emoji: '🐝',
       email: 'hello@example.com',
       github: 'github.com/beeblog',
-      twitter: '@beeblog',
+      wechat: '',
       content: '这里是关于页面的内容...',
     };
   }
@@ -39,7 +39,7 @@ export function getAboutData(): AboutData {
     emoji: data.emoji || '🐝',
     email: data.email || '',
     github: data.github || '',
-    twitter: data.twitter || '',
+    wechat: data.wechat || '',
     content,
   };
 }
@@ -52,7 +52,7 @@ export function saveAboutData(data: AboutData): void {
     emoji: data.emoji,
     email: data.email,
     github: data.github,
-    twitter: data.twitter,
+    wechat: data.wechat,
   });
   fs.writeFileSync(aboutFilePath, fileContent);
 }
