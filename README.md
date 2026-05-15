@@ -90,6 +90,33 @@ excerpt: 文章摘要
 
 ## 部署
 
+### Docker 部署（推荐）
+
+使用 Docker 快速部署博客：
+
+```bash
+# 构建镜像
+docker build -t beeblog .
+
+# 运行容器
+docker run -d -p 3000:3000 --name beeblog beeblog
+```
+
+或使用 docker-compose：
+
+```bash
+# 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+访问 http://localhost:3000
+
 ### Vercel 部署
 
 ```bash
@@ -101,11 +128,21 @@ npm run build
 > ⚠️ 注意：Vercel 部署为只读环境，不支持文章写入操作。
 > 如需动态发布文章，请使用支持文件写入的托管服务。
 
-### 其他部署方式
+### 传统服务器部署
 
-- Docker 部署
-- 传统服务器部署
-- 支持 Node.js 的任何平台
+```bash
+# 1. 安装依赖
+npm install
+
+# 2. 构建生产版本
+npm run build
+
+# 3. 使用 PM2 启动
+npm install -g pm2
+pm2 start npm --name "beeblog" -- start
+
+# 4. 配置 Nginx 反向代理
+```
 
 ## License
 
