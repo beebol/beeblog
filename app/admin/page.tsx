@@ -144,7 +144,7 @@ export default function AdminPage() {
     try {
       const postData = {
         title,
-        date: editingPost?.date || new Date().toISOString().split('T')[0],
+        date: editingPost?.date || new Date().toISOString().slice(0, 19),
         tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
         excerpt,
         content,
@@ -411,6 +411,14 @@ export default function AdminPage() {
                       {post.date ? format(new Date(post.date), 'yyyy-MM-dd') : '-'}
                     </td>
                     <td className="px-6 py-4 text-right">
+                      <a
+                        href={`/post/${post.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 text-sm text-green-400 hover:bg-green-400/10 rounded transition-colors mr-2"
+                      >
+                        浏览
+                      </a>
                       <button
                         onClick={() => openEditor(post)}
                         className="px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded transition-colors mr-2"

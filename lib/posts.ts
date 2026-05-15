@@ -50,7 +50,7 @@ export function getAllPosts(): PostMeta[] {
   const slugs = getPostSlugs();
   const posts = slugs
     .map((slug) => getPostBySlug(slug))
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // 降序，最新的在前
 
   return posts.map((post) => ({
     slug: post.slug,
@@ -100,9 +100,8 @@ export function deletePost(slug: string): void {
 }
 
 export function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    + '-' + Date.now().toString(36);
+  // 使用时间戳+随机数生成唯一slug，避免中文问题
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 6);
+  return `post-${timestamp}-${random}`;
 }

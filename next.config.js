@@ -5,6 +5,9 @@ const nextConfig = {
   images: {
     domains: ['images.unsplash.com'],
   },
+  experimental: {
+    turbo: undefined,
+  },
 };
 
 module.exports = nextConfig;

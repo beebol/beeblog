@@ -18,7 +18,7 @@ export default function PostCard({ post }: PostCardProps) {
     : '';
 
   return (
-    <Link href={`/post/${post.slug}`}>
+    <Link href={`/post/${encodeURIComponent(post.slug)}`}>
       <article className="bg-card rounded-xl p-6 hover:bg-card-hover transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 border border-slate-800">
         <h2 className="text-xl font-semibold text-text-primary mb-3 hover:text-primary transition-colors">
           {post.title}
