@@ -1,11 +1,11 @@
 # Node.js base image
 FROM node:20-alpine AS base
 
-WORKDIR /app
-
-# Install dependencies
+# Install dependencies stage
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
 COPY package.json package-lock.json* ./
 RUN npm ci
 
@@ -16,7 +16,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
 
 RUN npm run build
 
@@ -40,6 +39,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # 复制 content 目录（文章存储）
 COPY --from=builder --chown=nextjs:nodejs /app/content ./content
+
+# 确保 .next 目录可写（用于预渲染缓存）
+RUN chown -R nextjs:nodejs /app/.next && \
+    chmod -R 755 /app/.next
 
 USER nextjs
 
