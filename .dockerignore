@@ -1,9 +1,12 @@
 .dockerignore
-node_modules
-.next
+.next/standalone
+.next/cache
 .git
 .gitignore
 README.md
 SPEC.md
 Dockerfile
 docker-compose.yml
+*.log
+.DS_Store
+node_modules
