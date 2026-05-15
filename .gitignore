@@ -5,3 +5,8 @@ node_modules/
 *.log
 .DS_Store
 
+# 数据目录
+data/
+scripts/
+content/posts/
+
