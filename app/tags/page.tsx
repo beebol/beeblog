@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { getAllTags } from '@/lib/posts';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: '标签 - Beeblog',
   description: '浏览所有文章标签',
