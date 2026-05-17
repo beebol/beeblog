@@ -158,6 +158,17 @@ export default function AdminPage() {
       });
 
       if (res.ok) {
+        // 立即清除缓存
+        try {
+          await fetch('/api/revalidate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: editingPost?.slug }),
+          });
+        } catch (e) {
+          console.error('Cache revalidation failed:', e);
+        }
+        
         setEditMode('list');
         fetchPosts();
       } else {

@@ -11,6 +11,9 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// 每 60 秒重新验证缓存，确保文章更新后能及时显示
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const posts = getAllPosts();
   return posts.map((post) => ({
