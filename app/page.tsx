@@ -26,6 +26,8 @@ function HomeContent() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [displayCount, setDisplayCount] = useState(8);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     const tag = searchParams?.get('tag');
@@ -71,6 +73,30 @@ function HomeContent() {
       router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
+
+  const handleLoadMore = () => {
+    setDisplayCount((prev) => prev + 8);
+  };
+
+  // 监听滚动加载更多
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
+        displayCount < filteredPosts.length &&
+        !loadingMore
+      ) {
+        setLoadingMore(true);
+        setTimeout(() => {
+          setDisplayCount((prev) => prev + 8);
+          setLoadingMore(false);
+        }, 300);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [displayCount, filteredPosts.length, loadingMore]);
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -134,11 +160,31 @@ function HomeContent() {
             <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : filteredPosts.length > 0 ? (
-          filteredPosts.map((post, index) => (
-            <div key={post.slug} className={`animate-fadeIn stagger-${(index % 4) + 1}`}>
-              <PostCard post={post} />
-            </div>
-          ))
+          <>
+            {filteredPosts.slice(0, displayCount).map((post, index) => (
+              <div key={post.slug} className={`animate-fadeIn stagger-${(index % 4) + 1}`}>
+                <PostCard post={post} />
+              </div>
+            ))}
+            {displayCount < filteredPosts.length && (
+              <div className="col-span-2 text-center py-8">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-3 bg-card text-text-primary font-medium rounded-lg hover:bg-card-hover transition-colors disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                      加载中...
+                    </span>
+                  ) : (
+                    `加载更多 (还有 ${filteredPosts.length - displayCount} 篇)`
+                  )}
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="col-span-2 text-center py-12">
             <p className="text-text-secondary">暂无文章</p>

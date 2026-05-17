@@ -39,6 +39,10 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [filterTag, setFilterTag] = useState<string>('');
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // About editing states
   const [aboutName, setAboutName] = useState('');
@@ -75,6 +79,9 @@ export default function AdminPage() {
       const res = await fetch('/api/posts');
       const data = await res.json();
       setPosts(data);
+      // 提取所有唯一标签
+      const tags = [...new Set(data.flatMap((post: Post) => post.tags))].sort() as string[];
+      setAllTags(tags);
     } catch (error) {
       console.error('Failed to fetch posts:', error);
     } finally {
@@ -384,72 +391,36 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <h2 className="text-xl font-semibold text-text-primary mb-4">文章列表</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-text-primary">文章列表</h2>
+          <div className="flex items-center gap-2">
+            <label className="text-text-secondary text-sm">标签筛选：</label>
+            <select
+              value={filterTag}
+              onChange={(e) => { setFilterTag(e.target.value); setCurrentPage(1); }}
+              className="px-3 py-1.5 bg-background border border-slate-700 rounded-lg text-text-primary text-sm focus:outline-none focus:border-primary transition-colors"
+            >
+              <option value="">全部</option>
+              {allTags.map((tag) => (
+                <option key={tag} value={tag}>{tag}</option>
+              ))}
+            </select>
+            {filterTag && (
+              <button
+                onClick={() => { setFilterTag(''); setCurrentPage(1); }}
+                className="px-2 py-1 text-xs text-accent hover:bg-accent/10 rounded transition-colors"
+              >
+                清除
+              </button>
+            )}
+          </div>
+        </div>
 
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
-        ) : posts.length > 0 ? (
-          <div className="bg-card rounded-xl border border-slate-800 overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-slate-800/50">
-                <tr>
-                  <th className="text-left px-6 py-4 text-text-secondary text-sm font-medium">标题</th>
-                  <th className="text-left px-6 py-4 text-text-secondary text-sm font-medium">标签</th>
-                  <th className="text-left px-6 py-4 text-text-secondary text-sm font-medium">日期</th>
-                  <th className="text-right px-6 py-4 text-text-secondary text-sm font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {posts.map((post) => (
-                  <tr key={post.slug} className="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <Link href={`/post/${post.slug}`} target="_blank" className="text-text-primary hover:text-primary transition-colors">
-                        {post.title}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {post.tags.map((tag) => (
-                          <span key={tag} className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-text-secondary text-sm">
-                      {post.date ? format(new Date(post.date), 'yyyy-MM-dd') : '-'}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <a
-                        href={`/post/${post.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1 text-sm text-green-400 hover:bg-green-400/10 rounded transition-colors mr-2"
-                      >
-                        浏览
-                      </a>
-                      <button
-                        onClick={() => openEditor(post)}
-                        className="px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded transition-colors mr-2"
-                      >
-                        编辑
-                      </button>
-                      <button
-                        onClick={() => handleDelete(post.slug)}
-                        disabled={deletingSlug === post.slug}
-                        className="px-3 py-1 text-sm text-accent hover:bg-accent/10 rounded transition-colors disabled:opacity-50"
-                      >
-                        {deletingSlug === post.slug ? '删除中...' : '删除'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
+        ) : posts.length === 0 ? (
           <div className="text-center py-12 bg-card rounded-xl border border-slate-800">
             <p className="text-text-secondary mb-4">暂无文章</p>
             <button
@@ -459,6 +430,8 @@ export default function AdminPage() {
               创建第一篇文章
             </button>
           </div>
+        ) : (
+          <PostList posts={posts} filterTag={filterTag} deletingSlug={deletingSlug} onEdit={openEditor} onDelete={handleDelete} onClearFilter={() => { setFilterTag(''); setCurrentPage(1); }} currentPage={currentPage} pageSize={pageSize} onPageChange={setCurrentPage} />
         )}
       </div>
     );
@@ -719,6 +692,126 @@ export default function AdminPage() {
           {saving ? '保存中...' : '保存关于页面'}
         </button>
       </div>
+    </div>
+  );
+}
+
+// 文章列表组件
+function PostList({ posts, filterTag, deletingSlug, onEdit, onDelete, onClearFilter, currentPage, pageSize, onPageChange }: {
+  posts: Post[];
+  filterTag: string;
+  deletingSlug: string | null;
+  onEdit: (post: Post) => void;
+  onDelete: (slug: string) => void;
+  onClearFilter: () => void;
+  currentPage: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+}) {
+  const filteredPosts = filterTag ? posts.filter((post) => post.tags.includes(filterTag)) : posts;
+  const totalPages = Math.ceil(filteredPosts.length / pageSize);
+  const paginatedPosts = filteredPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  if (filteredPosts.length === 0) {
+    return (
+      <div className="text-center py-12 bg-card rounded-xl border border-slate-800">
+        <p className="text-text-secondary mb-4">暂无符合条件的文章</p>
+        <button
+          onClick={onClearFilter}
+          className="px-6 py-3 bg-primary text-background font-medium rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          清除筛选
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card rounded-xl border border-slate-800 overflow-hidden">
+      <table className="w-full">
+        <thead className="bg-slate-800/50">
+          <tr>
+            <th className="text-left px-6 py-4 text-text-secondary text-sm font-medium">标题</th>
+            <th className="text-left px-6 py-4 text-text-secondary text-sm font-medium">标签</th>
+            <th className="text-left px-6 py-4 text-text-secondary text-sm font-medium">日期</th>
+            <th className="text-right px-6 py-4 text-text-secondary text-sm font-medium">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedPosts.map((post) => (
+            <tr key={post.slug} className="border-t border-slate-800 hover:bg-slate-800/30 transition-colors">
+              <td className="px-6 py-4">
+                <Link href={`/post/${post.slug}`} target="_blank" className="text-text-primary hover:text-primary transition-colors">
+                  {post.title}
+                </Link>
+              </td>
+              <td className="px-6 py-4">
+                <div className="flex flex-wrap gap-1">
+                  {post.tags.map((tag) => (
+                    <span key={tag} className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </td>
+              <td className="px-6 py-4 text-text-secondary text-sm">
+                {post.date ? format(new Date(post.date), 'yyyy-MM-dd') : '-'}
+              </td>
+              <td className="px-6 py-4 text-right">
+                <a
+                  href={`/post/${post.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 text-sm text-green-400 hover:bg-green-400/10 rounded transition-colors mr-2"
+                >
+                  浏览
+                </a>
+                <button
+                  onClick={() => onEdit(post)}
+                  className="px-3 py-1 text-sm text-primary hover:bg-primary/10 rounded transition-colors mr-2"
+                >
+                  编辑
+                </button>
+                <button
+                  onClick={() => onDelete(post.slug)}
+                  disabled={deletingSlug === post.slug}
+                  className="px-3 py-1 text-sm text-accent hover:bg-accent/10 rounded transition-colors disabled:opacity-50"
+                >
+                  {deletingSlug === post.slug ? '删除中...' : '删除'}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {filterTag && (
+        <div className="px-6 py-3 bg-slate-800/30 border-t border-slate-800 text-text-secondary text-sm">
+          共 {filteredPosts.length} 篇含「{filterTag}」标签的文章
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between">
+          <span className="text-text-secondary text-sm">
+            第 {currentPage} / {totalPages} 页，共 {filteredPosts.length} 篇文章
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm bg-slate-800 text-text-secondary rounded hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              上一页
+            </button>
+            <button
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm bg-slate-800 text-text-secondary rounded hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              下一页
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
