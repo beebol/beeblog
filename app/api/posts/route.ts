@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, slug });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to save post' }, { status: 500 });
+    console.error('Save post error:', error);
+    return NextResponse.json({ error: 'Failed to save post', details: String(error) }, { status: 500 });
   }
 }
 

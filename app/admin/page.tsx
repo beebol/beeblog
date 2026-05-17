@@ -187,11 +187,13 @@ export default function AdminPage() {
         setEditMode('list');
         fetchPosts();
       } else {
-        alert('保存失败');
+        const data = await res.json();
+        console.error('Save failed:', data);
+        alert('保存失败: ' + (data.details || data.error));
       }
     } catch (error) {
       console.error('Failed to save:', error);
-      alert('保存失败');
+      alert('保存失败: ' + String(error));
     } finally {
       setSaving(false);
     }
