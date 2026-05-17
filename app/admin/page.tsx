@@ -149,13 +149,21 @@ export default function AdminPage() {
   const handleSavePost = async () => {
     setSaving(true);
     try {
+      // 确保 slug 存在
+      const postSlug = editingPost?.slug;
+      if (!postSlug) {
+        alert('错误：文章标识丢失，请返回列表重新操作');
+        setSaving(false);
+        return;
+      }
+
       const postData = {
         title,
         date: editingPost?.date || new Date().toISOString().slice(0, 19),
         tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
         excerpt,
         content,
-        slug: editingPost?.slug,
+        slug: postSlug,
       };
 
       const res = await fetch('/api/posts', {
@@ -170,7 +178,7 @@ export default function AdminPage() {
           await fetch('/api/revalidate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ slug: editingPost?.slug }),
+            body: JSON.stringify({ slug: postSlug }),
           });
         } catch (e) {
           console.error('Cache revalidation failed:', e);
